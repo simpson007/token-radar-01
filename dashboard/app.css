@@ -1,4 +1,12 @@
-/* Token Radar: a dark radar-room page. One palette, one type scale, no framework. */
+/* Token Radar: a dark radar-room page. One palette, one type scale, no framework.
+ * The palette is a radar room at night: a near-black blue ground, one green for the signal
+ * (the brand mark, the active tab, the implied-value bars, the positive moves) and one gold
+ * reserved for the watchlist badge, so the two things a reader scans for -- what is strongest
+ * and what the snapshot's own rule kept -- are the two things the colour marks. Red is used
+ * once, for a negative seven-day move. Everything else is a shade of the same blue, so the
+ * page reads as one instrument, not a set of widgets. Type is one system stack at two sizes:
+ * 15px for the reading text, 12-13px for the labels and the captions. Numbers are tabular
+ * throughout, so a column of dollar figures aligns down its right edge instead of jittering. */
 :root {
   --bg: #0a1120;
   --bg-soft: #0e1830;
@@ -28,7 +36,11 @@ a { color: var(--accent); }
 .skip:focus { left: 12px; top: 12px; background: var(--panel); color: var(--ink); padding: 8px 12px; border-radius: 6px; z-index: 9; }
 .shell { max-width: 1160px; margin: 0 auto; padding: 0 20px 48px; }
 
-/* header */
+/* header
+ * The header names the instrument and its date: a radar is a snapshot of one moment, and the
+ * date is the first thing a reader should check, because a board from 14 November is a board
+ * about 14 November. The brand mark is a plain green square because the page's palette is
+ * otherwise all blues, and the one green thing on it should be the radar itself. */
 .top { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; padding: 18px 0 8px; border-bottom: 1px solid var(--line); }
 .brand { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 800; letter-spacing: .2px; }
 .mark { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--accent); position: relative; flex: none; }
@@ -37,7 +49,12 @@ a { color: var(--accent); }
 .top-meta { display: flex; flex-wrap: wrap; gap: 8px; }
 .top-meta span { font-size: 12.5px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; }
 
-/* lede */
+/* lede
+ * The lede is one sentence that states the board's claim: how many pre-token protocols were
+ * ranked, how many of them are early finds below the floor, and what floor the snapshot's own
+ * rule drew. Below it the stat strip is four numbers that answer the four questions a reader
+ * asks first: how many protocols are on the board, how many are early, what the strongest one
+ * is worth, and what the floor was. */
 .lede { display: flex; flex-wrap: wrap; gap: 24px; justify-content: space-between; padding: 22px 0 6px; }
 .lede h1 { margin: 0 0 8px; font-size: 27px; line-height: 1.25; max-width: 640px; }
 .lede p { margin: 0; color: var(--muted); max-width: 640px; }
@@ -46,7 +63,12 @@ a { color: var(--accent); }
 .fact span { display: block; font-size: 12px; color: var(--muted); }
 .fact b { font-size: 19px; font-variant-numeric: tabular-nums; }
 
-/* controls */
+/* controls
+ * One search box and two selects on one row, collapsing to a column on a narrow screen; the tabs
+ * are two buttons, Pre-token and Live token, because the board and the live set are different
+ * things and a reader should never confuse one for the other. A focused control gets a green
+ * outline, and a focused row gets one too, so the page is usable without a mouse: a radar is a
+ * tool for reading, and reading with a keyboard should not be an afterthought. */
 .controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin: 18px 0 14px; }
 .field { display: flex; flex-direction: column; gap: 4px; }
 .field label, .field .sub { font-size: 12px; color: var(--muted); }
@@ -65,7 +87,13 @@ input:focus, select:focus, button:focus-visible { outline: 2px solid var(--accen
 .tabs button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #06130c; font-weight: 700; }
 .count { margin-left: auto; font-size: 13px; color: var(--muted); align-self: center; }
 
-/* panels and tables */
+/* panels and tables
+ * A panel is one bordered card on the ground colour; the table inside it scrolls sideways on a
+ * narrow screen rather than breaking the page. Rows are the page's buttons: the whole row is
+ * clickable and keyboard-focusable, with a hover shade and a green left edge on the selected
+ * row, so the detail view is one click away from anywhere on the board. The implied-value cell
+ * carries its own bar because a rank without a size is a claim without evidence: the bar shows
+ * how far behind the strongest row each row sits, and the number beside it says it exactly. */
 .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); margin: 0 0 18px; overflow: hidden; }
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 14px; }
@@ -95,7 +123,12 @@ tbody tr[data-selected="true"] { background: var(--panel-2); box-shadow: inset 3
 .empty p { margin: 0 0 14px; color: var(--muted); }
 .button.primary { background: var(--accent); border-color: var(--accent); color: #06130c; font-weight: 700; }
 
-/* model panel */
+/* model panel
+ * The formula is set in monospace because it is arithmetic, not prose: a reader should be able
+ * to copy it into a calculator and get the board's numbers. The peer grid is a set of dashed
+ * rows rather than a table because it is a reference list, not data to sort: category on the
+ * left, multiple and sample count on the right, strongest first, so the eye finds the highest
+ * price the market pays before it reads the rest. */
 .model { padding: 18px 20px; }
 .model h2 { margin: 0 0 6px; font-size: 18px; }
 .model p { margin: 0 0 12px; }
@@ -111,7 +144,13 @@ tbody tr[data-selected="true"] { background: var(--panel-2); box-shadow: inset 3
 .peer-grid div b { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .peer-grid div b i { font-style: normal; color: var(--faint); font-weight: 400; }
 
-/* detail dialog */
+/* detail dialog
+ * The dialog is a card on a dimmed page, capped at 88% of the viewport height and scrollable
+ * within, so a long farm plan never pushes the close button off the screen. The equation is two
+ * columns of dashed rows (input on the left, value on the right) on a wide screen and one column
+ * on a narrow one. The farm plan is an ordered list because its steps have an order: a wallet
+ * first, a position second, a weekly habit third, a hold fourth, a claim check fifth, a log
+ * last, and reading them out of order would be bad advice. */
 .detail { border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 12px; padding: 0; width: min(680px, 94vw); max-height: 88vh; overflow: auto; }
 .detail::backdrop { background: rgba(3, 6, 14, .72); }
 .detail-head { display: flex; justify-content: space-between; gap: 16px; padding: 18px 22px 0; }

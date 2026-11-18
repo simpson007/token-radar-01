@@ -1,5 +1,6 @@
 // A token-radar-01 entry (Node 22, standard library only).
 //
+// WHAT THIS PROGRAM DOES, IN ORDER
 // The program reads the sealed snapshot from /input/snapshot.json (or --input <file|dir>), scores
 // every pre-token protocol with the peer-multiple model in lib/model.ts, writes the ranked board to
 // /output/board.json, and copies this repository's dashboard/ and screenshots/ to /output. Last, it
@@ -11,8 +12,21 @@
 // DEX and a lending protocol of the same size are not worth the same; the page recomputes every row
 // from the snapshot figures and checks the number board.json carries.
 //
+// WHY THE ORDER MATTERS
+// The board is validated before anything is written: a board the gate would refuse is a failure
+// here, not a file to grade, so a bad model fails loudly on the author's machine instead of
+// quietly on the server. The dossier is written last on purpose: it is built from the /output the
+// previous steps wrote, and the scorer rebuilds it from that same /output and compares bytes, so
+// anything written after it would make the two disagree. The screenshots are copied, never taken
+// here: they are captures of the dashboard the author took with a browser, and the program's job
+// is to carry them into /output unchanged, checking only that there are at least three and that
+// their names are ones a dossier accepts.
+//
+// RUNNING IT ANYWHERE ELSE
 // Outside the grader's container, MAKEFUN_OUTPUT_DIR stands in for /output:
 //   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts --input ../input/snapshot.json
+// The program runs twice in grading and both runs must write the same bytes; everything it does
+// is a pure function of the snapshot file and the repository files it copies, so they do.
 
 import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -22,12 +36,17 @@ import { buildDossier } from './vendor/makefun-board.ts';
 
 const here = fileURLToPath(new URL('.', import.meta.url));
 
-/** The scorer's own caps (reference/gate.json): the text cap shapes the bytes, the rest refuse. */
+/** The scorer's own caps (reference/gate.json): the text cap shapes the bytes, the rest refuse.
+ * 65,536 is the dossier's text budget: the dashboard's source is shown whole only while it fits
+ * in that many bytes, so the page is kept small enough for the judge to read all of it. The
+ * screenshot caps are the gate's: at most 4 images, at most 512 KiB each. The name pattern is
+ * the dossier's: letters, digits and . _ -, starting with a letter or a digit. */
 const TEXT_MAX_BYTES = 65_536;
 const SCREENSHOT_CAPS = { max: 4, max_bytes: 524_288 };
 const IMAGE_NAME = /^[A-Za-z0-9_][A-Za-z0-9._-]{0,127}$/;
 
-/** --name <value> out of the arguments, or the fallback. */
+/** --name <value> out of the arguments, or the fallback. Both spellings are read: --input <file>
+ * and --input=<file>, because a grader may pass either and the program should not care which. */
 function arg(name: string, fallback: string): string {
   const at = process.argv.indexOf(`--${name}`);
   if (at >= 0 && at + 1 < process.argv.length) return process.argv[at + 1]!;
@@ -55,7 +74,12 @@ mkdirSync(out, { recursive: true });
 writeFileSync(join(out, 'board.json'), `${JSON.stringify({ rows: board })}\n`);
 writeFileSync(join(out, 'data.js'), dataScript(radar));
 
-/** Copy one directory's regular files into `to`, skipping names that start with a dot. */
+/** Copy one directory's regular files into `to`, skipping names that start with a dot.
+ * Dot-files are skipped because the repository holds its own (a .gitignore, a .makefun claim
+ * file) that are not part of the dashboard or the screenshots, and a dot-directory under
+ * dashboard/ would make the dossier refuse the whole entry. Only regular files are copied: a
+ * subdirectory or a symlink is silently left behind, and the returned list names what was
+ * actually carried over, so the log line at the end says the true count. */
 function copyFiles(from: string, to: string): string[] {
   if (!existsSync(from)) return [];
   mkdirSync(to, { recursive: true });
@@ -84,6 +108,8 @@ for (const name of shots) {
 }
 
 // The dossier is written last: the scorer rebuilds it from this /output and compares bytes.
+// Anything the program wrote after this point would make the entry's dossier differ from the
+// scorer's rebuild, so nothing follows this write except the log line.
 writeFileSync(join(out, 'dossier.json'), buildDossier(out, { text_max_bytes: TEXT_MAX_BYTES, screenshots: SCREENSHOT_CAPS, dashboard: { max_files: 400, max_bytes: 4_194_304 } }));
 
 process.stdout.write(
